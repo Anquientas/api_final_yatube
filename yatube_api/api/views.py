@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
 
-from posts.models import Group, Post
+from posts.models import Follow, Group, Post
 from .permissions import ReadOnly
 from .serializers import (
     CommentSerializer,
@@ -54,5 +54,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class FollowViewSet(viewsets.ModelViewSet):
+    # print(kwargs)
+    # queryset = Follow.objects.get()
+    # queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('following',)
+
+    def get_queryset(self):
+        print(self.request.user)
+        return Follow.objects.all().filter(user=self.request.user)
