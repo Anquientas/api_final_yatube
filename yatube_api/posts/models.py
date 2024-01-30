@@ -54,10 +54,10 @@ class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follows'
+        related_name='follows_user'
     )
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follows'
+        related_name='follows_following'
     )
