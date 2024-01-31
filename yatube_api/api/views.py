@@ -22,8 +22,9 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('-pub_date', 'author')
+    # Даже вместе с этими строками в тестах будет выводится ошибка
+    # filter_backends = (filters.OrderingFilter,)
+    # ordering_fields = ('-pub_date', 'author')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
