@@ -73,7 +73,6 @@ class Post(models.Model):
             f'group={self.group}, '
             f'pub_date={self.pub_date}'
         )
-        # return self.text
 
 
 class Comment(models.Model):
