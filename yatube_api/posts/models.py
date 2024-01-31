@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+
 User = get_user_model()
 
 
@@ -10,20 +11,38 @@ class Group(models.Model):
     description = models.TextField()
 
     def __str__(self):
-        return self.title
+        return (
+            f'title={self.title[:15]}, '
+            f'slug={self.slug}, '
+            f'description={self.description}'
+        )
 
 
 class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follows_user'
+        related_name='followers'
     )
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follows_following'
+        related_name='followings'
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_name_owner'
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f'user={self.user}, '
+            f'following={self.following}'
+        )
 
 
 class Post(models.Model):
@@ -40,18 +59,19 @@ class Post(models.Model):
         blank=True
     )
     group = models.ForeignKey(
-        Group, on_delete=models.SET_NULL,
-        related_name='posts', blank=True, null=True
-    )
-    follow = models.ForeignKey(
-        Follow, on_delete=models.SET_NULL,
-        related_name='posts', blank=True, null=True
+        Group,
+        on_delete=models.SET_NULL,
+        related_name='posts',
+        blank=True,
+        null=True
     )
 
     def __str__(self):
         return (
-            f'text={self.text[:15]}, author={self.author.username} '
-            f'group={self.group}, pub_date={self.pub_date}'
+            f'text={self.text[:15]}, '
+            f'author={self.author.username}, '
+            f'group={self.group}, '
+            f'pub_date={self.pub_date}'
         )
         # return self.text
 
@@ -73,3 +93,10 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
+
+    def __str__(self):
+        return (
+            f'text={self.title[:30]}, '
+            f'author={self.author}, '
+            f'post={self.post}'
+        )

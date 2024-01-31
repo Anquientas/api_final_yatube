@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -31,15 +32,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, ReadOnly)
 
     def get_post(self):
-        post = get_object_or_404(
+        return get_object_or_404(
             Post,
             id=self.kwargs.get('post_id')
         )
-        return post
 
     def get_queryset(self):
-        post = self.get_post()
-        return post.comments
+        return self.get_post().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(
@@ -53,15 +52,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
 
-class FollowViewSet(viewsets.ModelViewSet):
-    # print(kwargs)
-    # queryset = Follow.objects.get()
-    # queryset = Follow.objects.all()
+class FollowViewSet(CreateModelMixin, ListModelMixin, viewsets.GenericViewSet):
     serializer_class = FollowSerializer
     permission_classes = (IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('following',)
+    search_fields = ('=user__username', '=following__username',)
 
     def get_queryset(self):
-        print(self.request.user)
         return Follow.objects.all().filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
